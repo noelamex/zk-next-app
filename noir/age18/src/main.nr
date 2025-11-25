@@ -1,3 +1,3 @@
-fn main(age: u8) -> pub bool {
-    age >= 18
+fn main(age: u8) {
+    assert(age >= 18);
 }

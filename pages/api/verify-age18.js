@@ -14,10 +14,10 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { proof, publicInputs, circuitOutput } = req.body || {};
+    const { proof, publicInputs } = req.body || {};
 
-    if (!proof || !publicInputs || typeof circuitOutput !== "boolean") {
-      return res.status(400).json({ error: "Missing proof, public inputs, or circuitOutput" });
+    if (!proof || !publicInputs) {
+      return res.status(400).json({ error: "Missing proof or public inputs" });
     }
 
     // proof: number[] -> Uint8Array
@@ -39,7 +39,6 @@ export default async function handler(req, res) {
 
     return res.status(200).json({
       isValid: true,
-      authorized: circuitOutput === true, // true if over 18, false otherwise
     });
   } catch (err) {
     console.error(err);

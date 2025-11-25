@@ -1,6 +1,6 @@
 {
   "noir_version": "1.0.0-beta.15+83245db91dcf63420ef4bcbbd85b98f397fee663",
-  "hash": "17188250314229347086",
+  "hash": "3104578550410790358",
   "abi": {
     "parameters": [
       {
@@ -9,14 +9,14 @@
         "visibility": "private"
       }
     ],
-    "return_type": { "abi_type": { "kind": "boolean" }, "visibility": "public" },
+    "return_type": null,
     "error_types": {}
   },
-  "bytecode": "H4sIAAAAAAAA/51TsQ6CMBClhRgCTo5OjLpp/ARj4mQcXQwx0pgOopJq4sgnGH/ArzD6OWxO6uKMEFosWEnrJeS113d3744WaJkZFJcz7OsJ1ugeJJ9OMTWT40Lt2xjP0aQMKHDvIqejyZXhtbK1nh19GoQUeV+KZimdrlS82GTHGwVR99S+jAfnMJxMW73bcH9dH/rR6/iIYwAluU+qw5HTUBgeVNQPFDRB+bz5ZRH5gMDXpOjhAM0J3iEX+wQtUOButiuCkU/Yn2JocRkUpgVZvP1ffP58eLO4tV0uSNEQxIEfe1jCKm7VpOuCM5azQZHXy/p4A5r5rOU7BAAA",
-  "debug_symbols": "dZDBDoMgDIbfpWcOOvXiqyyLQayGpAFSYclifPdVIps77PKX9udrKRtMOKZlsG72K/T3DUa2RHYZyBsdrXdS3XYFJR0iI0oJLr5QQTO6CL1LRAqemlK+tAbtcoyaxa0UoJskSsPZEh6nXX3p6j/adCfbth+4E/ohmTaWf94LNfS1glvWJmsruh/t2eqR8NxqTs5cloyvUJzyDYG9wSkxHgOyJyPf",
+  "bytecode": "H4sIAAAAAAAA/51QsQrCMBBNUpXSOjk6ddRN8RNEcBJHFylig2SwaomCYz9B/AG/QvRzujlVF+fa0gTSNtbUB+HlLu/u3gWCFDXG6wVxUcx1FsP4aIwT6IIWgSK4zgJKgBW0oSxpAbUxKBOlQDzgCyYJPVeqVRqUXajnTLygf+nepqOr78/mncFjfLxvT8PgfX5GEYSK2hfzZql5CAuGKswRPf3aFaqIGLcZO8TDS0oO2CYuxSvs2bv9hhLsUv7znA2hg6buCvF687960JDkDOFu5gcyrknq4JcY5bhMC0v6NiVvvGeLseiX7/EBdpPjifcDAAA=",
+  "debug_symbols": "dZDBDsIgDIbfpWcOm9ODexVjFsa6haQB0oGJWfbuFiI6D17+0v58LWWDCce0DNbNfoX+tsHIlsguA3mjo/VOqtuuoKZDZEQpwcEXKmhGF6F3iUjBQ1Mql9agXYlRs7iNAnSTRGk4W8J82tWXbv6jXWW76we+CH2XTBvLP++FFvpWwaloV/Qsuuf2bPVI+N5qTs4clozPUJ36DYG9wSkx5gHFk5Ev",
   "file_map": {
     "50": {
-      "source": "fn main(age: u8) -> pub bool {\n    age >= 18\n}\n",
+      "source": "fn main(age: u8) {\n    assert(age >= 18);\n}\n",
       "path": "/home/dnoel/zk-next-app/noir/age18/src/main.nr"
     }
   },
