@@ -1,0 +1,38 @@
+{
+  "root": "0x135a58bfebe9b40d078fba8e2ade7751cbdd452852fc3d9a3e66c09b370f2c8a",
+  "users": {
+    "alice@example.com": {
+      "leaf": "0x121c1f13fa9e35d011ab303036164b75535ca6963806d16ffbae401c13bf7abc",
+      "siblings": [
+        "0x1852133ee9b516f58055b1834b28973a0e456c16950f880ab7cab88d02feabd2",
+        "0x2ac613dca496abf5eb05148d6c3f9b9a8cc828851b4c3d7a17eae2e8af0ab638"
+      ],
+      "indices": [
+        0,
+        0
+      ]
+    },
+    "bob@example.com": {
+      "leaf": "0x1852133ee9b516f58055b1834b28973a0e456c16950f880ab7cab88d02feabd2",
+      "siblings": [
+        "0x121c1f13fa9e35d011ab303036164b75535ca6963806d16ffbae401c13bf7abc",
+        "0x2ac613dca496abf5eb05148d6c3f9b9a8cc828851b4c3d7a17eae2e8af0ab638"
+      ],
+      "indices": [
+        1,
+        0
+      ]
+    },
+    "charlie@example.com": {
+      "leaf": "0x181cd737105a8dd69c54a237663421ba8a1c12d17479539d5338fe96f6950f3e",
+      "siblings": [
+        "0x181cd737105a8dd69c54a237663421ba8a1c12d17479539d5338fe96f6950f3e",
+        "0x4fa6410b982944ebf1ed4bf9f8a97ecc4091037f7592d920387db3772613687"
+      ],
+      "indices": [
+        0,
+        1
+      ]
+    }
+  }
+}
