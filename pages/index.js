@@ -1,78 +1,108 @@
-import Image from "next/image";
-import { Geist, Geist_Mono } from "next/font/google";
+"use client";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+import { useState } from "react";
+import { proveAgeInBrowser } from "../lib/proveAgeInBrowser";
 
 export default function Home() {
+  const [age, setAge] = useState("");
+  const [localResult, setLocalResult] = useState(null);
+  const [serverResult, setServerResult] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const handleProveAndVerify = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      setLocalResult(null);
+      setServerResult(null);
+
+      // 1. Prove in browser
+      // Ensure your proveAgeInBrowser function returns { proofHex, publicInputsHex }
+      const local = await proveAgeInBrowser(age);
+      setLocalResult(local);
+      console.log("Local Proof and Public Inputs:", local);
+
+      // 2. Send Proof AND Public Inputs to backend
+      const res = await fetch("/api/verify-age18", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(local),
+      });
+
+      const server = await res.json();
+
+      if (!res.ok) {
+        // Handle specific logic errors (e.g., Proof valid, but under 18)
+        throw new Error(server.error || `Verification failed: ${res.status}`);
+      }
+
+      setServerResult(server);
+    } catch (e) {
+      console.error(e);
+      setError(e.message || "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div
-      className={`${geistSans.className} ${geistMono.className} flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black`}
-    >
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <main style={{ padding: "2rem", maxWidth: 600, margin: "0 auto" }}>
+      <h1>ZK Age Check (18+)</h1>
+
+      <label style={{ display: "block", marginBottom: "1rem" }}>
+        Age:{" "}
+        <input
+          type="number"
+          min="0"
+          max="255"
+          value={age}
+          onChange={(e) => setAge(e.target.value)}
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the index.js file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+      </label>
+
+      <button onClick={handleProveAndVerify} disabled={loading}>
+        {loading ? "Proving and verifying…" : "Prove in browser & verify on server"}
+      </button>
+
+      {error && <p style={{ color: "red", marginTop: "1rem" }}>Error: {error}</p>}
+
+      {localResult && (
+        <section style={{ marginTop: "1.5rem" }}>
+          <h2>Browser (prover)</h2>
+          <p>
+            <strong>circuitOutput:</strong>{" "}
+            {localResult.circuitOutput ? "true (age ≥ 18)" : "false (age < 18)"}
           </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs/pages/getting-started?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+          <details>
+            <summary>Proof (raw)</summary>
+            <code style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
+              {JSON.stringify(localResult.proof)}
+            </code>
+          </details>
+
+          <details>
+            <summary>Public Inputs</summary>
+            <code style={{ whiteSpace: "pre-wrap" }}>
+              {JSON.stringify(localResult.publicInputs, null, 2)}
+            </code>
+          </details>
+        </section>
+      )}
+
+      {serverResult && (
+        <section style={{ marginTop: "1.5rem", border: "1px solid #ccc", padding: "10px" }}>
+          <h2>Backend Verification</h2>
+          <p>
+            <strong>Proof Valid:</strong> {serverResult.isValid ? "✅ Yes" : "❌ No"}
+          </p>
+          {/* If the server sends back an "authorized" boolean based on public inputs */}
+          <p>
+            <strong> Over 18 ?:</strong>{" "}
+            {serverResult.authorized ? "🎉 YES (Over 18)" : "⛔ NO (Under 18)"}
+          </p>
+        </section>
+      )}
+    </main>
   );
 }

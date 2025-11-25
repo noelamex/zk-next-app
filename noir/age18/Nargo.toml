@@ -1,0 +1,6 @@
+[package]
+name = "age18"
+type = "bin"
+authors = ["dn"]
+
+[dependencies]
