@@ -6,19 +6,83 @@ import { provePasswordInBrowser } from "../lib/provePasswordInBrowser";
 import { proveMerkleInBrowser } from "../lib/proveMerkleInBrowser";
 
 export default function Home() {
+  // Age Verification
   const [age, setAge] = useState("");
   const [localResult, setLocalResult] = useState(null);
   const [serverResult, setServerResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  // Password Verification
   const [password, setPassword] = useState("");
   const [passwordResult, setPasswordResult] = useState(null);
   const [passwordLoading, setPasswordLoading] = useState(false);
   const [passwordError, setPasswordError] = useState(null);
+  // Merkle Verification (Allowlist Membership)
   const [email, setEmail] = useState("");
   const [merkleResult, setMerkleResult] = useState(null);
   const [merkleLoading, setMerkleLoading] = useState(false);
   const [merkleError, setMerkleError] = useState(null);
+  // Login Verification
+  const [loginLoading, setLoginLoading] = useState(false);
+  const [loginError, setLoginError] = useState(null);
+  const [loginStatus, setLoginStatus] = useState(null);
+  // Protected Content
+  const [protectedResult, setProtectedResult] = useState(null);
+  const [protectedError, setProtectedError] = useState(null);
+
+  const fetchProtectedData = async () => {
+    try {
+      setProtectedError(null);
+      setProtectedResult(null);
+
+      const res = await fetch("/api/protected");
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to fetch protected data");
+      }
+
+      setProtectedResult(data);
+    } catch (err) {
+      setProtectedError(err.message);
+    }
+  };
+
+  const handleZkLogin = async () => {
+    try {
+      setLoginLoading(true);
+      setLoginError(null);
+      setLoginStatus(null);
+
+      // 1. Generate all three proofs in the browser
+      const [passwordProof, merkleProof, ageProof] = await Promise.all([
+        provePasswordInBrowser(password),
+        proveMerkleInBrowser(email),
+        proveAgeInBrowser(age),
+      ]);
+
+      // 2. Send them to the combined login API
+      const res = await fetch("/api/zk-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ passwordProof, merkleProof, ageProof }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || `Login failed with status ${res.status}`);
+      }
+
+      // 3. If we reach here, backend verified all proofs and set a cookie
+      setLoginStatus("Logged in with zk proofs ✅");
+    } catch (e) {
+      console.error(e);
+      setLoginError(e.message || "ZK login failed");
+    } finally {
+      setLoginLoading(false);
+    }
+  };
 
   const handleMerkleProve = async () => {
     try {
@@ -285,6 +349,53 @@ export default function Home() {
               <strong>In Allowlist:</strong> {merkleResult.inAllowlist ? "✅ Yes" : "❌ No"}
             </p>
           </div>
+        )}
+      </section>
+
+      {/* Login Section */}
+      <section className="mt-8 border-t pt-4">
+        <h2>ZK Login (combined)</h2>
+        <p>
+          Uses your <strong>age</strong>, <strong>password</strong>, and{" "}
+          <strong>allowlist email</strong> proofs to log in and set a session cookie.
+        </p>
+
+        <ul>
+          <li>Age (Design B circuit, must be ≥ 18)</li>
+          <li>Password (secret 1234 → Poseidon hash)</li>
+          <li>Email in allowlist (Merkle membership)</li>
+        </ul>
+
+        <button
+          onClick={handleZkLogin}
+          disabled={loginLoading}
+          className="w-full mt-4 px-6 py-3 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
+        >
+          {loginLoading ? "Proving & logging in…" : "Log in with ZK"}
+        </button>
+
+        {loginError && <p className="text-red-500 mt-2">{loginError}</p>}
+
+        {loginStatus && <p className="text-green-500 mt-2">{loginStatus}</p>}
+      </section>
+      {/* Protected Content Section */}
+      <section className="mt-8 border-t pt-4">
+        <h2>Protected Resource</h2>
+        <p>Only accessible after ZK Login.</p>
+
+        <button
+          onClick={fetchProtectedData}
+          className="w-full mt-4 px-6 py-3 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
+        >
+          Fetch Protected Data
+        </button>
+
+        {protectedError && <p className="text-red-500 mt-2">{protectedError}</p>}
+
+        {protectedResult && (
+          <pre className="mt-2 p-2 bg-white rounded text-sm whitespace-pre-wrap break-words">
+            {JSON.stringify(protectedResult, null, 2)}
+          </pre>
         )}
       </section>
     </main>
